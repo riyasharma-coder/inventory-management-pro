@@ -1,0 +1,18 @@
+# Node dependencies
+**/node_modules/
+**/dist/
+
+# Java / Maven
+**/target/
+**/*.class
+**/mvnw
+**/mvnw.cmd
+**/.mvn/
+
+# IDE files
+.idea/
+*.iml
+.DS_Store
+# Database files
+data/
+*.db
