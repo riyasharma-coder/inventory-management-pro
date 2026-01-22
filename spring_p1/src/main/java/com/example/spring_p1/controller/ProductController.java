@@ -4,13 +4,13 @@ import com.example.spring_p1.entity.Product;
 import com.example.spring_p1.repository.ProductRepository;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/products")
@@ -28,53 +28,24 @@ public class ProductController {
         return ResponseEntity.ok(saved);
     }
 
-    // ================= READ ALL (SORT + FILTER) =================
+    // ================= READ ALL (WITH PAGINATION & SORTING) =================
     @GetMapping
-    public List<Product> getAllProducts(
-            @RequestParam(required = false) String sortBy,
-            @RequestParam(defaultValue = "asc") String order,
-            @RequestParam(required = false) Integer minQuantity,
-            @RequestParam(required = false) Double maxPrice
+    public Page<Product> getAllProducts(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "asc") String order
     ) {
-        // fetch all products
-        List<Product> products = productRepository.findAll();
+        // Create Sort object based on parameters
+        Sort sort = order.equalsIgnoreCase("desc")
+                ? Sort.by(sortBy).descending()
+                : Sort.by(sortBy).ascending();
 
-        // apply filtering
-        if (minQuantity != null) {
-            products = products.stream()
-                    .filter(p -> p.getQuantity() >= minQuantity)
-                    .collect(Collectors.toList());
-        }
-        if (maxPrice != null) {
-            products = products.stream()
-                    .filter(p -> p.getPrice() <= maxPrice)
-                    .collect(Collectors.toList());
-        }
+        // Create Pageable object
+        Pageable pageable = PageRequest.of(page, size, sort);
 
-        // apply sorting
-        if (sortBy != null) {
-            Sort.Direction direction = order.equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC;
-            products = products.stream()
-                    .sorted((p1, p2) -> {
-                        if (sortBy.equalsIgnoreCase("name")) {
-                            return direction.isAscending()
-                                    ? p1.getName().compareTo(p2.getName())
-                                    : p2.getName().compareTo(p1.getName());
-                        } else if (sortBy.equalsIgnoreCase("quantity")) {
-                            return direction.isAscending()
-                                    ? Integer.compare(p1.getQuantity(), p2.getQuantity())
-                                    : Integer.compare(p2.getQuantity(), p1.getQuantity());
-                        } else if (sortBy.equalsIgnoreCase("price")) {
-                            return direction.isAscending()
-                                    ? Double.compare(p1.getPrice(), p2.getPrice())
-                                    : Double.compare(p2.getPrice(), p1.getPrice());
-                        }
-                        return 0;
-                    })
-                    .collect(Collectors.toList());
-        }
-
-        return products;
+        // Fetch paginated results from DB (MAANG efficiency!)
+        return productRepository.findAll(pageable);
     }
 
     // ================= READ ONE =================

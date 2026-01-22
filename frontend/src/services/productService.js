@@ -1,11 +1,16 @@
 const API_BASE_URL = "http://localhost:8080/api/products";
 
 export const productService = {
-    async getAllProducts() {
-        const response = await fetch(API_BASE_URL);
+    // UPDATED: Now accepts page and size parameters
+    async getAllProducts(page = 0, size = 8) {
+        // We append the page and size to the URL as Query Parameters
+        const response = await fetch(`${API_BASE_URL}?page=${page}&size=${size}`);
+
         if (!response.ok) {
             throw new Error("Failed to fetch products");
         }
+
+        // This will now return the Page object { content: [], totalPages: x, ... }
         return response.json();
     },
 
