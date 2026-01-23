@@ -1,1 +1,20 @@
 @import "tailwindcss";
+
+/* 1. Define the dark utility strategy */
+@variant dark (&:where(.dark, .dark *));
+
+@layer base {
+    /* 2. Setup Light Mode defaults */
+    body {
+        background-color: #f8fafc;
+        color: #0f172a; /* slate-900 */
+        @apply transition-colors duration-300;
+    }
+
+    /* 3. Setup Dark Mode overrides */
+    .dark body {
+        background-color: #020617; /* slate-950 */
+        color: #f8fafc; /* slate-50 */
+    }
+}
+
