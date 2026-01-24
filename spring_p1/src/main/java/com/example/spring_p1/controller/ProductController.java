@@ -4,17 +4,14 @@ import com.example.spring_p1.entity.Product;
 import com.example.spring_p1.repository.ProductRepository;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/products")
-@CrossOrigin(origins = "http://localhost:5173")
+@CrossOrigin(origins = "*") // FIX 1: Allows Vercel to talk to Render
 @Validated
 public class ProductController {
 
@@ -28,23 +25,13 @@ public class ProductController {
         return ResponseEntity.ok(saved);
     }
 
-    // ================= READ ALL (WITH PAGINATION) =================
+    // ================= READ ALL (SIMPLIFIED) =================
     @GetMapping
-    public Page<Product> getAllProducts(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "8") int size,
-            @RequestParam(defaultValue = "id") String sortBy,
-            @RequestParam(defaultValue = "asc") String order
-    ) {
-        Sort sort = order.equalsIgnoreCase("desc")
-                ? Sort.by(sortBy).descending()
-                : Sort.by(sortBy).ascending();
-
-        Pageable pageable = PageRequest.of(page, size, sort);
-        return productRepository.findAll(pageable);
+    public List<Product> getAllProducts() {
+        // FIX 2: Returns a simple List [] that your frontend can understand immediately
+        return productRepository.findAll();
     }
 
-    // ================= READ ONE (FIXED: int -> String) =================
     @GetMapping("/{id}")
     public ResponseEntity<Product> getProduct(@PathVariable String id) {
         return productRepository.findById(id)
@@ -52,37 +39,25 @@ public class ProductController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // ================= UPDATE (MERGE STYLE) =================
     @PutMapping("/{id}")
-    public ResponseEntity<Product> updateProduct(
-            @PathVariable String id,
-            @RequestBody @Valid Product productDetails
-    ) {
+    public ResponseEntity<Product> updateProduct(@PathVariable String id, @RequestBody @Valid Product productDetails) {
         return productRepository.findById(id)
                 .map(existingProduct -> {
-                    // Update all fields explicitly
                     existingProduct.setName(productDetails.getName());
                     existingProduct.setQuantity(productDetails.getQuantity());
                     existingProduct.setPrice(productDetails.getPrice());
-
-                    // CRITICAL: These two lines map your new features
                     existingProduct.setCategory(productDetails.getCategory());
                     existingProduct.setImageUrl(productDetails.getImageUrl());
-
-                    Product updated = productRepository.save(existingProduct);
-                    return ResponseEntity.ok(updated);
+                    return ResponseEntity.ok(productRepository.save(existingProduct));
                 })
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // ================= DELETE (FIXED: int -> String) =================
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteProduct(@PathVariable String id) {
-        if (!productRepository.existsById(id)) {
-            return ResponseEntity.notFound().build();
-        }
-
+        if (!productRepository.existsById(id)) return ResponseEntity.notFound().build();
         productRepository.deleteById(id);
         return ResponseEntity.noContent().build();
     }
 }
+
