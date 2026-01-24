@@ -28,52 +28,56 @@ public class ProductController {
         return ResponseEntity.ok(saved);
     }
 
-    // ================= READ ALL (WITH PAGINATION & SORTING) =================
+    // ================= READ ALL (WITH PAGINATION) =================
     @GetMapping
     public Page<Product> getAllProducts(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "8") int size,
             @RequestParam(defaultValue = "id") String sortBy,
             @RequestParam(defaultValue = "asc") String order
     ) {
-        // Create Sort object based on parameters
         Sort sort = order.equalsIgnoreCase("desc")
                 ? Sort.by(sortBy).descending()
                 : Sort.by(sortBy).ascending();
 
-        // Create Pageable object
         Pageable pageable = PageRequest.of(page, size, sort);
-
-        // Fetch paginated results from DB (MAANG efficiency!)
         return productRepository.findAll(pageable);
     }
 
-    // ================= READ ONE =================
+    // ================= READ ONE (FIXED: int -> String) =================
     @GetMapping("/{id}")
-    public ResponseEntity<Product> getProduct(@PathVariable int id) {
+    public ResponseEntity<Product> getProduct(@PathVariable String id) {
         return productRepository.findById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // ================= UPDATE =================
+    // ================= UPDATE (MERGE STYLE) =================
     @PutMapping("/{id}")
     public ResponseEntity<Product> updateProduct(
-            @PathVariable int id,
-            @RequestBody @Valid Product product
+            @PathVariable String id,
+            @RequestBody @Valid Product productDetails
     ) {
-        if (!productRepository.existsById(id)) {
-            return ResponseEntity.notFound().build();
-        }
+        return productRepository.findById(id)
+                .map(existingProduct -> {
+                    // Update all fields explicitly
+                    existingProduct.setName(productDetails.getName());
+                    existingProduct.setQuantity(productDetails.getQuantity());
+                    existingProduct.setPrice(productDetails.getPrice());
 
-        product.setId(id);
-        Product updated = productRepository.save(product);
-        return ResponseEntity.ok(updated);
+                    // CRITICAL: These two lines map your new features
+                    existingProduct.setCategory(productDetails.getCategory());
+                    existingProduct.setImageUrl(productDetails.getImageUrl());
+
+                    Product updated = productRepository.save(existingProduct);
+                    return ResponseEntity.ok(updated);
+                })
+                .orElse(ResponseEntity.notFound().build());
     }
 
-    // ================= DELETE =================
+    // ================= DELETE (FIXED: int -> String) =================
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteProduct(@PathVariable int id) {
+    public ResponseEntity<Void> deleteProduct(@PathVariable String id) {
         if (!productRepository.existsById(id)) {
             return ResponseEntity.notFound().build();
         }

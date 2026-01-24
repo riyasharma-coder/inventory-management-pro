@@ -1,23 +1,26 @@
 package com.example.spring_p1.entity;
 
-import jakarta.persistence.*;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 import jakarta.validation.constraints.*;
 import lombok.*;
 
-@Entity
+@Document(collection = "products")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class Product {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private String id;
 
     @NotBlank(message = "Name cannot be empty")
     private String name;
 
-    @Min(value = 1, message = "Quantity must be at least 1")
+    private String category;
+    private String imageUrl;
+
+    @Min(value = 0, message = "Quantity cannot be negative")
     private int quantity;
 
     @DecimalMin(value = "0.01", message = "Price must be greater than 0")
