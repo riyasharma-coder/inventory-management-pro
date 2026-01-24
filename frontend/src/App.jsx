@@ -345,8 +345,19 @@ function App() {
                         <div className="bg-rose-100 p-4 rounded-2xl inline-block mb-4 text-rose-600"><AlertTriangle size={28} /></div>
                         <h2 className="text-lg font-black dark:text-white mb-2 tracking-tight">Erase Asset?</h2>
                         <div className="flex gap-3 mt-4">
-                            <button onClick={() => setShowDeleteModal(false)} className="flex-1 py-3 text-sm font-bold text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl transition-all">Abey Nahi</button>
-                            <button onClick={confirmDelete} className="flex-1 bg-rose-500 text-white py-3 rounded-xl font-bold">Haan, Delete Kar</button>
+                            <button
+                                onClick={() => setShowDeleteModal(false)}
+                                className="flex-1 py-3 text-sm font-bold text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl transition-all"
+                            >
+                                Cancel
+                            </button>
+
+                            <button
+                                onClick={confirmDelete}
+                                className="flex-1 bg-rose-500 text-white py-3 rounded-xl font-bold"
+                            >
+                                Confirm Delete
+                            </button>
                         </div>
                     </div>
                 </div>
