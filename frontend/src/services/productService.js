@@ -1,4 +1,4 @@
-const API_BASE_URL = "http://localhost:8080/api/products";
+const API_BASE_URL = import.meta.env.VITE_API_URL || "https://inventory-management-pro-2hj4.onrender.com/api/products";
 
 export const productService = {
     // UPDATED: Now accepts page and size parameters
