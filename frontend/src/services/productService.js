@@ -1,48 +1,31 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL || "https://inventory-management-pro-2hj4.onrender.com/api/products";
+// Humne direct Render ka full URL daal diya hai taaki koi confusion na rahe
+const API_BASE_URL = "https://inventory-management-pro-2hj4.onrender.com/api/products";
 
 export const productService = {
-    // UPDATED: Now accepts page and size parameters
     async getAllProducts(page = 0, size = 8) {
-        // We append the page and size to the URL as Query Parameters
+        // Full URL: https://inventory-management-pro-2hj4.onrender.com/api/products?page=0&size=8
         const response = await fetch(`${API_BASE_URL}?page=${page}&size=${size}`);
-
-        if (!response.ok) {
-            throw new Error("Failed to fetch products");
-        }
-
-        // This will now return the Page object { content: [], totalPages: x, ... }
+        if (!response.ok) throw new Error("Failed to fetch products");
         return response.json();
     },
 
     async createProduct(product) {
         const response = await fetch(API_BASE_URL, {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify(product),
         });
-
-        if (!response.ok) {
-            throw new Error("Failed to create product");
-        }
-
+        if (!response.ok) throw new Error("Failed to create product");
         return response.json();
     },
 
     async updateProduct(id, product) {
         const response = await fetch(`${API_BASE_URL}/${id}`, {
             method: "PUT",
-            headers: {
-                "Content-Type": "application/json",
-            },
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify(product),
         });
-
-        if (!response.ok) {
-            throw new Error("Failed to update product");
-        }
-
+        if (!response.ok) throw new Error("Failed to update product");
         return response.json();
     },
 
@@ -50,9 +33,6 @@ export const productService = {
         const response = await fetch(`${API_BASE_URL}/${id}`, {
             method: "DELETE",
         });
-
-        if (!response.ok) {
-            throw new Error("Failed to delete product");
-        }
+        if (!response.ok) throw new Error("Failed to delete product");
     },
 };
